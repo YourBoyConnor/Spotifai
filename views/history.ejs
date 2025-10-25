@@ -480,8 +480,6 @@
                 }
 
                 const data = await response.json();
-                console.log('History data received:', data);
-                console.log('Artworks type:', typeof data.artworks, 'Is array:', Array.isArray(data.artworks));
                 userArtworks = data.artworks;
                 userStats = data.stats;
                 userProfile = data.user;
@@ -559,7 +557,6 @@
             
             // Ensure userArtworks is an array
             if (!Array.isArray(userArtworks)) {
-                console.error('userArtworks is not an array:', userArtworks);
                 userArtworks = [];
             }
             
@@ -568,7 +565,7 @@
                     <div class="empty-state">
                         <h3>No Artworks Yet</h3>
                         <p>Generate your first AI artwork to see it here!</p>
-                        <a href="/" class="btn-view btn-small">Generate Artwork</a>
+                        <button onclick="goToGenerator()" class="btn-view btn-small">Generate Artwork</button>
                     </div>
                 `;
                 return;
@@ -684,6 +681,15 @@
         }
 
         function goBack() {
+            const params = getHashParams();
+            if (params.access_token) {
+                window.location.href = `/results?access_token=${params.access_token}`;
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        function goToGenerator() {
             const params = getHashParams();
             if (params.access_token) {
                 window.location.href = `/results?access_token=${params.access_token}`;

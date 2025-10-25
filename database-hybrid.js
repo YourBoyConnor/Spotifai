@@ -105,13 +105,16 @@ export async function getUserArtworks(userId) {
         // Use Vercel KV
         try {
             const artworks = await kv.get(`artworks:${userId}`);
+            console.log('KV artworks for user', userId, ':', artworks, 'type:', typeof artworks);
+            
             // Ensure we always return an array
             if (Array.isArray(artworks)) {
                 return artworks;
-            } else if (artworks && typeof artworks === 'object') {
-                // If it's an object, convert to array
+            } else if (artworks && typeof artworks === 'object' && Object.keys(artworks).length > 0) {
+                // If it's a non-empty object, convert to array
                 return Object.values(artworks);
             } else {
+                // Empty object, null, undefined, or other - return empty array
                 return [];
             }
         } catch (error) {
