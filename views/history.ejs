@@ -494,6 +494,10 @@
 
                 const data = await response.json();
                 console.log('API response data:', data);
+                console.log('API response data type:', typeof data);
+                console.log('API response artworks:', data.artworks);
+                console.log('API response artworks type:', typeof data.artworks);
+                console.log('API response artworks length:', Array.isArray(data.artworks) ? data.artworks.length : 'not an array');
                 
                 userArtworks = data.artworks;
                 userStats = data.stats;
@@ -507,6 +511,11 @@
         }
 
         function displayHistory() {
+            console.log('displayHistory() called');
+            console.log('userArtworks:', userArtworks);
+            console.log('userStats:', userStats);
+            console.log('userProfile:', userProfile);
+            
             const loadingElement = document.getElementById('loading');
             const contentElement = document.getElementById('content');
             
@@ -568,14 +577,22 @@
         }
 
         function displayArtworks() {
+            console.log('displayArtworks() called');
+            console.log('userArtworks before processing:', userArtworks);
+            
             const artworksGridEl = document.getElementById('artworksGrid');
             
             // Ensure userArtworks is an array
             if (!Array.isArray(userArtworks)) {
+                console.log('userArtworks is not an array, converting to empty array');
                 userArtworks = [];
             }
             
+            console.log('userArtworks after processing:', userArtworks);
+            console.log('userArtworks length:', userArtworks.length);
+            
             if (userArtworks.length === 0) {
+                console.log('No artworks found, showing empty state');
                 artworksGridEl.innerHTML = `
                     <div class="empty-state">
                         <h3>No Artworks Yet</h3>
