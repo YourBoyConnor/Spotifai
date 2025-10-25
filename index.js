@@ -1,13 +1,12 @@
+import './config.js'; // Load environment variables first
 import path from 'path';
 import url from 'url';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
 const PORT = process.env.PORT || 8888;
 const app = express();
 
@@ -38,6 +37,10 @@ app.get('/results', (req, res) => {
     res.render('results', {
         api_key: process.env.OPENAI_API_KEY,
     });
+})
+
+app.get('/history', (req, res) => {
+    res.render('history');
 })
 
 app.listen(PORT, () => {

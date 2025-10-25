@@ -9,153 +9,551 @@
     <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
     <link rel="manifest" href="img/site.webmanifest">
-    <title>SpotifyAI</title>
-    <script type="module">
-        import OpenAI from 'openai';
-
-        var badWords = ["4r5e", "5h1t", "5hit", "a55", "anal", "anus", "ar5e", "arrse", "arse", "ass", "ass-fucker", "asses", "assfucker", "assfukka", "asshole", "assholes", "asswhole", "a_s_s", "b!tch", "b00bs", "b17ch", "b1tch", "ballbag", "balls", "ballsack", "bastard", "beastial", "beastiality", "bellend", "bestial", "bestiality", "bi+ch", "biatch", "bitch", "bitcher", "bitchers", "bitches", "bitchin", "bitching", "bloody", "blow job", "blowjob", "blowjobs", "boiolas", "bollock", "bollok", "boner", "boob", "boobs", "booobs", "boooobs", "booooobs", "booooooobs", "breasts", "buceta", "bugger", "bum", "bunny fucker", "butt", "butthole", "buttmuch", "buttplug", "c0ck", "c0cksucker", "carpet muncher", "cawk", "chink", "cipa", "cl1t", "clit", "clitoris", "clits", "cnut", "cock", "cock-sucker", "cockface", "cockhead", "cockmunch", "cockmuncher", "cocks", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocksucks", "cocksuka", "cocksukka", "cok", "cokmuncher", "coksucka", "coon", "cox", "crap", "cum", "cummer", "cumming", "cums", "cumshot", "cunilingus", "cunillingus", "cunnilingus", "cunt", "cuntlick", "cuntlicker", "cuntlicking", "cunts", "cyalis", "cyberfuc", "cyberfuck", "cyberfucked", "cyberfucker", "cyberfuckers", "cyberfucking", "d1ck", "damn", "dick", "dickhead", "dildo", "dildos", "dink", "dinks", "dirsa", "dlck", "dog-fucker", "doggin", "dogging", "donkeyribber", "doosh", "duche", "dyke", "ejaculate", "ejaculated", "ejaculates", "ejaculating", "ejaculatings", "ejaculation", "ejakulate", "f u c k", "f u c k e r", "f4nny", "fag", "fagging", "faggitt", "faggot", "faggs", "fagot", "fagots", "fags", "fanny", "fannyflaps", "fannyfucker", "fanyy", "fatass", "fcuk", "fcuker", "fcuking", "feck", "fecker", "felching", "fellate", "fellatio", "fingerfuck", "fingerfucked", "fingerfucker", "fingerfuckers", "fingerfucking", "fingerfucks", "fistfuck", "fistfucked", "fistfucker", "fistfuckers", "fistfucking", "fistfuckings", "fistfucks", "flange", "fook", "fooker", "fuck", "fucka", "fucked", "fucker", "fuckers", "fuckhead", "fuckheads", "fuckin", "fucking", "fuckings", "fuckingshitmotherfucker", "fuckme", "fucks", "fuckwhit", "fuckwit", "fudge packer", "fudgepacker", "fuk", "fuker", "fukker", "fukkin", "fuks", "fukwhit", "fukwit", "fux", "fux0r", "f_u_c_k", "gangbang", "gangbanged", "gangbangs", "gaylord", "gaysex", "goatse", "God", "god-dam", "god-damned", "goddamn", "goddamned", "hardcoresex", "hell", "heshe", "hoar", "hoare", "hoer", "homo", "hore", "horniest", "horny", "hotsex", "jack-off", "jackoff", "jap", "jerk-off", "jism", "jiz", "jizm", "jizz", "kawk", "knob", "knobead", "knobed", "knobend", "knobhead", "knobjocky", "knobjokey", "kock", "kondum", "kondums", "kum", "kummer", "kumming", "kums", "kunilingus", "l3i+ch", "l3itch", "labia", "lust", "lusting", "m0f0", "m0fo", "m45terbate", "ma5terb8", "ma5terbate", "masochist", "master-bate", "masterb8", "masterbat*", "masterbat3", "masterbate", "masterbation", "masterbations", "masturbate", "mo-fo", "mof0", "mofo", "mothafuck", "mothafucka", "mothafuckas", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckers", "mothafuckin", "mothafucking", "mothafuckings", "mothafucks", "mother fucker", "motherfuck", "motherfucked", "motherfucker", "motherfuckers", "motherfuckin", "motherfucking", "motherfuckings", "motherfuckka", "motherfucks", "muff", "mutha", "muthafecker", "muthafuckker", "muther", "mutherfucker", "n1gga", "n1gger", "nazi", "nigg3r", "nigg4h", "nigga", "niggah", "niggas", "niggaz", "nigger", "niggers", "nob", "nob jokey", "nobhead", "nobjocky", "nobjokey", "numbnuts", "nutsack", "orgasim", "orgasims", "orgasm", "orgasms", "p0rn", "pawn", "pecker", "penis", "penisfucker", "phonesex", "phuck", "phuk", "phuked", "phuking", "phukked", "phukking", "phuks", "phuq", "pigfucker", "pimpis", "piss", "pissed", "pisser", "pissers", "pisses", "pissflaps", "pissin", "pissing", "pissoff", "poop", "porn", "porno", "pornography", "pornos", "prick", "pricks", "pron", "pube", "pusse", "pussi", "pussies", "pussy", "pussys", "rectum", "retard", "rimjaw", "rimming", "s hit", "s.o.b.", "sadist", "schlong", "screwing", "scroat", "scrote", "scrotum", "semen", "sex", "sh!+", "sh!t", "sh1t", "shag", "shagger", "shaggin", "shagging", "shemale", "shi+", "shit", "shitdick", "shite", "shited", "shitey", "shitfuck", "shitfull", "shithead", "shiting", "shitings", "shits", "shitted", "shitter", "shitters", "shitting", "shittings", "shitty", "skank", "slut", "sluts", "smegma", "smut", "snatch", "son-of-a-bitch", "spac", "spunk", "s_h_i_t", "t1tt1e5", "t1tties", "teets", "teez", "testical", "testicle", "tit", "titfuck", "tits", "titt", "tittie5", "tittiefucker", "titties", "tittyfuck", "tittywank", "titwank", "tosser", "turd", "tw4t", "twat", "twathead", "twatty", "twunt", "twunter", "v14gra", "v1gra", "vagina", "viagra", "vulva", "w00se", "wang", "wank", "wanker", "wanky", "whoar", "whore", "willies", "willy", "xrated", "xxx"].map(name => name.toLowerCase());
-
-        const openai = new OpenAI({
-            api_key: process.env.OPENAI_API_KEY
-        });
-
-        const getHashParams = () => {
-            const hashParams = {};
-            let e,
-                r = /([^&;=]+)=?([^&;]*)/g,
-                q = window.location.search.substring(1);
-
-            while (e = r.exec(q)) {
-                hashParams[e[1]] = decodeURIComponent(e[2]);
-            }
-
-            return hashParams;
-        }
-
-        async function getLikedSongs() {
-            var quit = false;
-            var likedSongs = [];
-            var queryParam = `limit=50&offset=0`;
-            var url = 'https://api.spotify.com/v1/me/tracks?' + queryParam;
-
-            const headers = {
-                Authorization: 'Bearer ' + getHashParams().access_token
-            }
-
-            while (url != null && !quit) {
-                var nextURL = '';
-
-                await fetch(url, { headers })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data != undefined) {
-                            data.items.forEach(element => {
-                                if (!badWords.includes(element.track.name.toLowerCase())) {
-                                    likedSongs.push(element.track.name);
-                                }
-                            });
-
-                            nextURL = data.next;
-                        } else {
-                            throw new Error("Getting data failed. Please try again.");
-                        }
-
-                    })
-                    .catch(error => {
-                        console.log(error);
-                        return -1;
-                    });
-
-                url = nextURL;
-            }
-
-            return likedSongs;
-        }
-
-        async function getDalleImage(api_key) {
-            document.getElementById("image_button").disabled = true;
-            await getLikedSongs().then(res => {
-                if (res == -1) {
-                    throw new Error("Getting Spotify Songs failed. Please try again.");
-                }
-
-                // Shuffle
-                res.sort(() => Math.random() - 0.5);
-
-                // Return shuffled array
-                return res;
-            }).then(async likedSongs => {
-                const maxResults = 5;
-                var likedSongsCopy = likedSongs.slice(0);
-
-                // Trim & Stringify
-                do {
-                    likedSongs.pop();
-                } while (likedSongs.join(" ").length + (likedSongs.length * 2) + 4 > 900);
-                likedSongsString = likedSongs.join(" ");
-
-                // Request OpenAI API for images
-                for (counter = false, shuffle = false; counter < maxResults;) {
-                    await openai.createImage({
-                        model: 'dall-e-3',
-                        prompt: likedSongsString,
-                        n: 1,
-                        size: '256x256',
-                    }).then(async response => {
-                        var data = response.json();
-                        if (response.ok) {
-                            await data.then(res => {
-                                console.log(`Data Used: ${likedSongsString}, Result: ${res.data[0].url}`);
-                            }).then(() => {
-                                counter++;
-                                shuffle = true;
-                            });
-                        }
-                    }).catch(error => {
-                        console.log(error);
-                    }).finally(() => {
-                        likedSongs.pop();
-
-                        // Shuffle, Trim, & Stringify if likedSongs is empty or data has been returned
-                        if (shuffle || likedSongs.length == 0) {
-                            likedSongs = likedSongsCopy.slice(0);
-                            likedSongs = fisherYates(likedSongs);
-                            do {
-                                likedSongs.pop();
-                            } while (likedSongs.join(" ").length + 4 > 1000);
-                            shuffle = false;
-                        }
-
-                        likedSongsString = likedSongs.join(' ');
-                    })
-                }
-            }).catch(err => {
-                console.log(err);
-            });
-            document.getElementById("image_button").disabled = false;
-        }
-
-        const fisherYates = (toShuffle = []) => {
-            for (let i = (toShuffle.length - 1); i > 0; i -= 1) {
-                const randomIndex = Math.floor(Math.random() * (i + 1));
-                [toShuffle[i], toShuffle[randomIndex]] = [toShuffle[randomIndex], toShuffle[i]];
-            }
-            return toShuffle;
-        }
-    </script>
+    <title>SpotifAI - Your Musical Art</title>
 </head>
 
 <body>
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="results-container">
+        <div class="results-header">
+            <h1>Your Musical Masterpieces</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem;">
+                AI-generated artwork inspired by your Spotify listening history
+            </p>
+        </div>
 
-    <h1>RESULTS PAGE!</h1>
+        <div class="button-group">
+            <button id="image_button" type="button" onclick="getDalleImage();" class="btn">
+                🎨 Generate Art
+            </button>
+            <button id="history_button" type="button" onclick="viewHistory();" class="btn">
+                📚 View History
+            </button>
+            <button type="button" onclick="window.location.href='http://localhost:8888/api/logout'" class="btn">
+                👋 Log Out
+            </button>
+        </div>
 
-    <button type="button" onclick="window.location.href='http://localhost:8888/'" class="btn btn-primary btn-lg">Return
-        to Login Page</button>
-    <button id="image_button" type="button" onclick="getDalleImage();" class="btn btn-primary btn-lg">Return
-        Images</button>
-    <button type="button" onclick="window.location.href='http://localhost:8888/api/logout'"
-        class="btn btn-primary btn-lg">Log Out</button>
+        <div id="image-results" class="image-container"></div>
+    </div>
 
+    <!-- Modal for image details -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="AI Artwork">
+                <div class="modal-info">
+                    <h3>Inspired by these songs:</h3>
+                    <ul id="songList"></ul>
+                    
+                    <div class="prompt-details">
+                        <h4>Artistic Elements Used:</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Color Palette:</span> 
+                            <span id="colorPalette"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Visual Elements:</span> 
+                            <span id="visualElements"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mood:</span> 
+                            <span id="mood"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Themes:</span> 
+                            <span id="themes"></span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Song Breakdown:</span> 
+                            <span id="songBreakdown"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Error Modal -->
+    <div id="errorModal" class="error-modal" style="display: none;">
+        <div class="error-modal-content">
+            <div class="error-modal-header">
+                <span id="errorModalIcon" class="error-icon">⚠️</span>
+                <span id="errorModalTitle" class="error-title">Error</span>
+                <span class="error-close" onclick="closeErrorModal()">&times;</span>
+            </div>
+            <div class="error-modal-body">
+                <p id="errorModalMessage">An error occurred.</p>
+            </div>
+            <div class="error-modal-footer">
+                <button onclick="closeErrorModal()" class="error-ok-button">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const badWords = ["4r5e", "5h1t", "5hit", "a55", "anal", "anus", "ar5e", "arrse", "arse", "ass", "ass-fucker", "asses", "assfucker", "assfukka", "asshole", "assholes", "asswhole", "a_s_s", "b!tch", "b00bs", "b17ch", "b1tch", "ballbag", "balls", "ballsack", "bastard", "beastial", "beastiality", "bellend", "bestial", "bestiality", "bi+ch", "biatch", "bitch", "bitcher", "bitchers", "bitches", "bitchin", "bitching", "bloody", "blow job", "blowjob", "blowjobs", "boiolas", "bollock", "bollok", "boner", "boob", "boobs", "booobs", "boooobs", "booooobs", "booooooobs", "breasts", "buceta", "bugger", "bum", "bunny fucker", "butt", "butthole", "buttmuch", "buttplug", "c0ck", "c0cksucker", "carpet muncher", "cawk", "chink", "cipa", "cl1t", "clit", "clitoris", "clits", "cnut", "cock", "cock-sucker", "cockface", "cockhead", "cockmunch", "cockmuncher", "cocks", "cocksuck", "cocksucked", "cocksucker", "cocksucking", "cocksucks", "cocksuka", "cocksukka", "cok", "cokmuncher", "coksucka", "coon", "cox", "crap", "cum", "cummer", "cumming", "cums", "cumshot", "cunilingus", "cunillingus", "cunnilingus", "cunt", "cuntlick", "cuntlicker", "cuntlicking", "cunts", "cyalis", "cyberfuc", "cyberfuck", "cyberfucked", "cyberfucker", "cyberfuckers", "cyberfucking", "d1ck", "damn", "dick", "dickhead", "dildo", "dildos", "dink", "dinks", "dirsa", "dlck", "dog-fucker", "doggin", "dogging", "donkeyribber", "doosh", "duche", "dyke", "ejaculate", "ejaculated", "ejaculates", "ejaculating", "ejaculatings", "ejaculation", "ejakulate", "f u c k", "f u c k e r", "f4nny", "fag", "fagging", "faggitt", "faggot", "faggs", "fagot", "fagots", "fags", "fanny", "fannyflaps", "fannyfucker", "fanyy", "fatass", "fcuk", "fcuker", "fcuking", "feck", "fecker", "felching", "fellate", "fellatio", "fingerfuck", "fingerfucked", "fingerfucker", "fingerfuckers", "fingerfucking", "fingerfucks", "fistfuck", "fistfucked", "fistfucker", "fistfuckers", "fistfucking", "fistfuckings", "fistfucks", "flange", "fook", "fooker", "fuck", "fucka", "fucked", "fucker", "fuckers", "fuckhead", "fuckheads", "fuckin", "fucking", "fuckings", "fuckingshitmotherfucker", "fuckme", "fucks", "fuckwhit", "fuckwit", "fudge packer", "fudgepacker", "fuk", "fuker", "fukker", "fukkin", "fuks", "fukwhit", "fukwit", "fux", "fux0r", "f_u_c_k", "gangbang", "gangbanged", "gangbangs", "gaylord", "gaysex", "goatse", "God", "god-dam", "god-damned", "goddamn", "goddamned", "hardcoresex", "hell", "heshe", "hoar", "hoare", "hoer", "homo", "hore", "horniest", "horny", "hotsex", "jack-off", "jackoff", "jap", "jerk-off", "jism", "jiz", "jizm", "jizz", "kawk", "knob", "knobead", "knobed", "knobend", "knobhead", "knobjocky", "knobjokey", "kock", "kondum", "kondums", "kum", "kummer", "kumming", "kums", "kunilingus", "l3i+ch", "l3itch", "labia", "lust", "lusting", "m0f0", "m0fo", "m45terbate", "ma5terb8", "ma5terbate", "masochist", "master-bate", "masterb8", "masterbat*", "masterbat3", "masterbate", "masterbation", "masterbations", "masturbate", "mo-fo", "mof0", "mofo", "mothafuck", "mothafucka", "mothafuckas", "mothafuckaz", "mothafucked", "mothafucker", "mothafuckers", "mothafuckin", "mothafucking", "mothafuckings", "mothafucks", "mother fucker", "motherfuck", "motherfucked", "motherfucker", "motherfuckers", "motherfuckin", "motherfucking", "motherfuckings", "motherfuckka", "motherfucks", "muff", "mutha", "muthafecker", "muthafuckker", "muther", "mutherfucker", "n1gga", "n1gger", "nazi", "nigg3r", "nigg4h", "nigga", "niggah", "niggas", "niggaz", "nigger", "niggers", "nob", "nob jokey", "nobhead", "nobjocky", "nobjokey", "numbnuts", "nutsack", "orgasim", "orgasims", "orgasm", "orgasms", "p0rn", "pawn", "pecker", "penis", "penisfucker", "phonesex", "phuck", "phuk", "phuked", "phuking", "phukked", "phukking", "phuks", "phuq", "pigfucker", "pimpis", "piss", "pissed", "pisser", "pissers", "pisses", "pissflaps", "pissin", "pissing", "pissoff", "poop", "porn", "porno", "pornography", "pornos", "prick", "pricks", "pron", "pube", "pusse", "pussi", "pussies", "pussy", "pussys", "rectum", "retard", "rimjaw", "rimming", "s hit", "s.o.b.", "sadist", "schlong", "screwing", "scroat", "scrote", "scrotum", "semen", "sex", "sh!+", "sh!t", "sh1t", "shag", "shagger", "shaggin", "shagging", "shemale", "shi+", "shit", "shitdick", "shite", "shited", "shitey", "shitfuck", "shitfull", "shithead", "shiting", "shitings", "shits", "shitted", "shitter", "shitters", "shitting", "shittings", "shitty", "skank", "slut", "sluts", "smegma", "smut", "snatch", "son-of-a-bitch", "spac", "spunk", "s_h_i_t", "t1tt1e5", "t1tties", "teets", "teez", "testical", "testicle", "tit", "titfuck", "tits", "titt", "tittie5", "tittiefucker", "titties", "tittyfuck", "tittywank", "titwank", "tosser", "turd", "tw4t", "twat", "twathead", "twatty", "twunt", "twunter", "v14gra", "v1gra", "vagina", "viagra", "vulva", "w00se", "wang", "wank", "wanker", "wanky", "whoar", "whore", "willies", "willy", "xrated", "xxx"].map(name => name.toLowerCase());
+
+        // Store prompt data for each image
+        let imagePromptData = [];
+
+        // Client-side rate limiting
+        let lastRequestTime = 0;
+        const CLIENT_COOLDOWN = 30000; // 30 seconds
+        let requestCount = 0;
+        const MAX_REQUESTS_PER_SESSION = 10;
+        const SESSION_START_TIME = Date.now();
+        const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+
+        function checkClientRateLimit() {
+            const now = Date.now();
+            
+            // Check if session has expired
+            if (now - SESSION_START_TIME > SESSION_DURATION) {
+                requestCount = 0; // Reset counter for new session
+            }
+            
+            // Check session limit
+            if (requestCount >= MAX_REQUESTS_PER_SESSION) {
+                return {
+                    allowed: false,
+                    reason: 'session_limit',
+                    message: `You've reached the maximum of ${MAX_REQUESTS_PER_SESSION} requests per session. Please refresh the page to start a new session.`
+                };
+            }
+            
+            // Check cooldown
+            if (now - lastRequestTime < CLIENT_COOLDOWN) {
+                const remainingTime = Math.ceil((CLIENT_COOLDOWN - (now - lastRequestTime)) / 1000);
+                return {
+                    allowed: false,
+                    reason: 'cooldown',
+                    message: `Please wait ${remainingTime} seconds before making another request.`
+                };
+            }
+            
+            return { allowed: true };
+        }
+
+        function updateClientRateLimit() {
+            lastRequestTime = Date.now();
+            requestCount++;
+        }
+
+        // Custom error modal functions
+        function showErrorModal(icon, title, message, showTimer = false) {
+            const modal = document.getElementById('errorModal');
+            const iconEl = document.getElementById('errorModalIcon');
+            const titleEl = document.getElementById('errorModalTitle');
+            const messageEl = document.getElementById('errorModalMessage');
+            
+            iconEl.textContent = icon;
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // Add timer if requested
+            if (showTimer) {
+                const timerDiv = document.createElement('div');
+                timerDiv.id = 'errorTimer';
+                timerDiv.style.cssText = `
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    background: rgba(255, 193, 7, 0.1);
+                    border: 1px solid #ffc107;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: #ffc107;
+                `;
+                timerDiv.innerHTML = 'Next generation available in: <span id="timerCountdown">30</span> seconds';
+                messageEl.parentNode.appendChild(timerDiv);
+                
+                // Start countdown
+                startCountdown();
+            }
+            
+            modal.style.display = 'flex'; // Use flex for centering
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+        }
+
+        function startCountdown() {
+            let timeLeft = 30;
+            const countdownEl = document.getElementById('timerCountdown');
+            
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (countdownEl) {
+                    countdownEl.textContent = timeLeft;
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    closeErrorModal();
+                    // Re-enable the button
+                    const imageButton = document.getElementById("image_button");
+                    if (imageButton) {
+                        imageButton.disabled = false;
+                        imageButton.innerHTML = 'Generate AI Artwork';
+                    }
+                }
+            }, 1000);
+        }
+
+        function closeErrorModal() {
+            const modal = document.getElementById('errorModal');
+            modal.style.display = 'none';
+            
+            // Clean up timer if it exists
+            const timerDiv = document.getElementById('errorTimer');
+            if (timerDiv) {
+                timerDiv.remove();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('errorModal');
+            if (event.target === modal) {
+                closeErrorModal();
+            }
+        }
+
+        function getHashParams() {
+            const hashParams = {};
+            let e, r = /([^&;=]+)=?([^&;]*)/g,
+                q = window.location.search.substring(1);
+            while (e = r.exec(q)) {
+                hashParams[e[1]] = decodeURIComponent(e[2]);
+            }
+            return hashParams;
+        }
+
+        async function getLikedSongs(accessToken) {
+            let likedSongs = [];
+            let url = 'https://api.spotify.com/v1/me/tracks?limit=50';
+            const headers = { Authorization: 'Bearer ' + accessToken };
+
+            try {
+                while (url) {
+                    const response = await fetch(url, { headers });
+                    if (!response.ok) throw new Error(`Spotify API error: ${response.statusText}`);
+                    const data = await response.json();
+                    const cleanSongs = data.items
+                        .map(item => item.track.name)
+                        .filter(name => !badWords.some(badWord => name.toLowerCase().includes(badWord)));
+                    likedSongs.push(...cleanSongs);
+                    url = data.next;
+                }
+                return likedSongs;
+            } catch (error) {
+                console.error("Failed to fetch liked songs:", error);
+                throw error;
+            }
+        }
+
+        function fisherYatesShuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function createPrompts(songs, count = 5, maxLen = 200) {
+            const prompts = [];
+            const promptSongs = [];
+            let shuffledSongs = fisherYatesShuffle([...songs]);
+
+            for (let i = 0; i < count; i++) {
+                let prompt = [];
+                if (shuffledSongs.length === 0) {
+                    shuffledSongs = fisherYatesShuffle([...songs]);
+                }
+                while (shuffledSongs.length > 0 && prompt.length < 5) {
+                    prompt.push(shuffledSongs.pop());
+                }
+                if (prompt.length > 0) {
+                    prompts.push(prompt.join(', '));
+                    promptSongs.push([...prompt]);
+                }
+            }
+            return { prompts, promptSongs };
+        }
+
+        async function generateImageFromPrompt(prompt, accessToken) {
+            try {
+                // Check client-side rate limit BEFORE making any API calls
+                const rateLimitCheck = checkClientRateLimit();
+                if (!rateLimitCheck.allowed) {
+                    showErrorModal('⚠️', 'Rate Limit Reached', rateLimitCheck.message, true);
+                    throw new Error(`Rate limited: ${rateLimitCheck.message}`);
+                }
+
+                // Update rate limit tracking
+                updateClientRateLimit();
+
+                const response = await fetch('/api/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, accessToken: accessToken })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    
+                    // Handle server-side rate limiting (backup)
+                    if (response.status === 429) {
+                        showErrorModal('⚠️', 'Rate Limit Reached', `${errorData.error}\n\nPlease wait before trying again.`);
+                        throw new Error(`Rate limited: ${errorData.error}`);
+                    }
+                    
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+                
+                return response.json();
+            } catch (error) {
+                console.error('Error generating image:', error);
+                throw error;
+            }
+        }
+
+        function openImageModal(imageSrc, songs, index, details) {
+            try {
+                const modal = document.getElementById('imageModal');
+                const modalImage = document.getElementById('modalImage');
+                const songList = document.getElementById('songList');
+
+                if (!modal || !modalImage || !songList) {
+                    console.error('Modal elements not found');
+                    return;
+                }
+
+                modalImage.src = imageSrc;
+                modalImage.alt = `AI Artwork ${index + 1}`;
+
+                // Clear and populate song list
+                songList.innerHTML = '';
+                songs.forEach(song => {
+                    const li = document.createElement('li');
+                    li.textContent = song;
+                    songList.appendChild(li);
+                });
+
+                // Populate prompt details with error checking
+                if (details) {
+                    const colorPaletteEl = document.getElementById('colorPalette');
+                    const visualElementsEl = document.getElementById('visualElements');
+                    const moodEl = document.getElementById('mood');
+                    const themesEl = document.getElementById('themes');
+                    const songBreakdownEl = document.getElementById('songBreakdown');
+
+                    if (colorPaletteEl) colorPaletteEl.textContent = details.colorPalette || 'Unknown';
+                    if (visualElementsEl) visualElementsEl.textContent = details.visualElements || 'Unknown';
+                    if (moodEl) moodEl.textContent = details.mood || 'Unknown';
+                    if (themesEl) themesEl.textContent = details.themes || 'Unknown';
+                    if (songBreakdownEl) {
+                        // Format song breakdown with proper line breaks
+                        const breakdownText = details.songBreakdown || 'Unknown';
+                        songBreakdownEl.innerHTML = breakdownText.replace(/\n/g, '<br>');
+                    }
+                }
+
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error opening modal:', error);
+            }
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function getDalleImages() {
+            const imageButton = document.getElementById("image_button");
+            const resultsDiv = document.getElementById("image-results");
+            
+            // Check rate limit before starting
+            const rateLimitCheck = checkClientRateLimit();
+            if (!rateLimitCheck.allowed) {
+                showErrorModal('⚠️', 'Rate Limit Reached', rateLimitCheck.message, true);
+                return;
+            }
+            
+            imageButton.disabled = true;
+            resultsDiv.innerHTML = '<div class="status-message"><div class="loading"></div>Fetching your liked songs...</div>';
+
+            try {
+                const params = getHashParams();
+                if (!params.access_token) {
+                    throw new Error("No access token found. Please log in again.");
+                }
+
+                const likedSongs = await getLikedSongs(params.access_token);
+                if (likedSongs.length === 0) {
+                    resultsDiv.innerHTML = '<div class="error-message">No suitable liked songs found to generate images.</div>';
+                    return;
+                }
+
+                resultsDiv.innerHTML = '<div class="status-message"><div class="loading"></div>Generating AI artwork based on your music taste...</div>';
+                const { prompts, promptSongs } = createPrompts(likedSongs, 1);
+                
+                imagePromptData = [];
+                
+                const imagePromises = prompts.map(prompt => generateImageFromPrompt(prompt, params.access_token));
+                const results = await Promise.allSettled(imagePromises);
+
+                resultsDiv.innerHTML = '';
+                let successCount = 0;
+                let rateLimitCount = 0;
+                
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled' && result.value.url) {
+                        const img = document.createElement('img');
+                        img.src = result.value.url;
+                        img.alt = `AI artwork ${index + 1} inspired by your music`;
+                        img.style.cursor = 'pointer';
+                        img.title = 'Click to see details';
+                        
+                        // Add click event with error handling
+                        img.addEventListener('click', () => {
+                            try {
+                                openImageModal(result.value.url, promptSongs[index], index, result.value.details);
+                            } catch (error) {
+                                console.error('Error in click handler:', error);
+                            }
+                        });
+                        
+                        resultsDiv.appendChild(img);
+                        successCount++;
+                        
+                        imagePromptData.push({
+                            url: result.value.url,
+                            songs: promptSongs[index],
+                            details: result.value.details
+                        });
+                    } else {
+                        console.error("Image generation failed:", result.reason);
+                        
+                        // Check if it's a rate limit error
+                        if (result.reason && result.reason.message && result.reason.message.includes('Rate limited')) {
+                            rateLimitCount++;
+                        }
+                    }
+                });
+                
+                // Show user feedback for rate limiting
+                if (rateLimitCount > 0) {
+                    const warningDiv = document.createElement('div');
+                    warningDiv.className = 'rate-limit-warning';
+                    warningDiv.innerHTML = `
+                        <div style="background: rgba(255, 193, 7, 0.15); border: 2px solid #ffc107; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; color: #ffc107; text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚠️</div>
+                            <strong style="font-size: 1.1rem;">Rate Limit Notice</strong><br><br>
+                            ${rateLimitCount} of ${prompts.length} images couldn't be generated due to rate limiting.<br>
+                            Please wait a moment before trying again.<br><br>
+                            <small style="opacity: 0.8;">This helps prevent excessive API usage and keeps the service running smoothly for everyone.</small>
+                        </div>
+                    `;
+                    resultsDiv.appendChild(warningDiv);
+                }
+
+                if (resultsDiv.children.length === 0) {
+                    resultsDiv.innerHTML = '<div class="error-message">No images could be generated. Please try again.</div>';
+                }
+
+            } catch (err) {
+                console.error(err);
+                
+                // Show user-friendly alerts for different error types
+                if (err.message.includes('Rate limited')) {
+                    // Rate limit error already shown in modal above - stop the process
+                    resultsDiv.innerHTML = `<div class="error-message">Rate limit reached. Please wait before trying again.</div>`;
+                    return; // Stop the process completely
+                } else if (err.message.includes('No access token')) {
+                    showErrorModal('🔐', 'Authentication Error', 'Please log in to Spotify again to generate artwork.');
+                    resultsDiv.innerHTML = `<div class="error-message">Please log in to Spotify again.</div>`;
+                } else if (err.message.includes('No suitable liked songs')) {
+                    showErrorModal('🎵', 'No Songs Found', 'We couldn\'t find enough liked songs to generate artwork. Please like some songs on Spotify first.');
+                    resultsDiv.innerHTML = `<div class="error-message">No suitable liked songs found. Please like some songs on Spotify first.</div>`;
+                } else {
+                    showErrorModal('❌', 'Error', `An unexpected error occurred: ${err.message}\n\nPlease try again.`);
+                    resultsDiv.innerHTML = `<div class="error-message">An error occurred: ${err.message}. Please try again.</div>`;
+                }
+            } finally {
+                // Re-enable button after a delay to prevent rapid clicking
+                setTimeout(() => {
+                    imageButton.disabled = false;
+                    imageButton.innerHTML = 'Generate AI Artwork';
+                }, 5000); // 5 second cooldown
+            }
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            if (!particlesContainer) return;
+            
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function viewHistory() {
+            const params = getHashParams();
+            if (params.access_token) {
+                window.location.href = `/history?access_token=${params.access_token}`;
+            } else {
+                alert('Please log in to view your history');
+            }
+        }
+
+        // Modal event listeners with error checking
+        window.addEventListener('load', () => {
+            createParticles();
+            
+            // Close modal when clicking the X
+            const closeButton = document.querySelector('.close');
+            if (closeButton) {
+                closeButton.addEventListener('click', closeImageModal);
+            }
+            
+            // Close modal when clicking outside of it
+            window.addEventListener('click', (event) => {
+                const modal = document.getElementById('imageModal');
+                if (modal && event.target === modal) {
+                    closeImageModal();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeImageModal();
+                }
+            });
+        });
+
+        window.getDalleImage = getDalleImages;
+    </script>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Made by <a href="https://connorpymm.com" target="_blank" rel="noopener noreferrer">Connor Pymm</a></p>
+    </footer>
 </body>
 
 </html>

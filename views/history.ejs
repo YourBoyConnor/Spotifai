@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpotifAI - Your Artwork History</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .history-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .history-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-details h2 {
+            margin: 0;
+            color: #1db954;
+        }
+        
+        .user-details p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.8;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1db954;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            opacity: 0.8;
+        }
+        
+        .artworks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .artwork-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .artwork-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .artwork-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        
+        .artwork-info {
+            padding: 1rem;
+        }
+        
+        .artwork-date {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+        
+        .artwork-songs {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .artwork-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-view {
+            background: #1db954;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #1ed760;
+        }
+        
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            opacity: 0.7;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 1rem;
+            color: #1db954;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: #1db954;
+            border: 2px solid #1db954;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        }
+        
+        .back-button:hover {
+            background: #1ed760;
+            border-color: #1ed760;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        }
+        
+        .loading {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            color: #ffffff;
+            width: auto !important;
+            height: auto !important;
+            border: none !important;
+            border-radius: 0 !important;
+            border-top-color: transparent !important;
+            animation: none !important;
+            margin-right: 0 !important;
+        }
+        
+        #loading[style*="display: none"] {
+            display: none !important;
+        }
+        
+        #loading.hidden {
+            display: none !important;
+        }
+        
+        .loading-container {
+            text-align: center;
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #1db954;
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite both;
+        }
+        
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        .loading p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+        
+        #content {
+            width: 100%;
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 12px;
+            padding: 0;
+            max-width: 95%;
+            max-height: 95%;
+            width: 900px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-body {
+            display: flex;
+            width: 100%;
+        }
+
+        .modal-content img {
+            width: 50%;
+            height: auto;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .modal-info {
+            width: 50%;
+            padding: 2rem;
+            overflow-y: auto;
+            color: #ffffff;
+        }
+
+        .modal-info h3 {
+            color: #1db954;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-info ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .modal-info li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prompt-details h4 {
+            color: #1db954;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .prompt-details .detail-item {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .prompt-details .detail-label {
+            color: #1db954;
+            font-weight: bold;
+        }
+
+        .prompt-details .detail-item.full-width {
+            display: block;
+            margin-top: 1rem;
+        }
+
+        .prompt-details .detail-item.full-width .detail-label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .prompt-details .detail-item.full-width span:last-child {
+            display: block;
+            line-height: 1.6;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid #1db954;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            line-height: 1;
+            text-align: center;
+            user-select: none;
+        }
+
+        .close:hover {
+            color: #1db954;
+            background: rgba(29, 185, 84, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="#" onclick="goBack()" class="back-button">← Back to Generator</a>
+    
+    <div class="history-container">
+        <div class="history-header">
+            <h1>Your Artwork History</h1>
+            <p>All your AI-generated artworks from your Spotify music</p>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="loading-container">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <p>Loading your artwork history...</p>
+            </div>
+        </div>
+        
+        <div id="error" class="error-message" style="display: none;">
+            Error loading your history. Please try again.
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div id="userInfo" class="user-info"></div>
+            <div id="statsGrid" class="stats-grid"></div>
+            <div id="artworksGrid" class="artworks-grid"></div>
+        </div>
+    </div>
+
+    <!-- Artwork Modal -->
+    <div id="artworkModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeArtworkModal()">&times;</span>
+            <div class="modal-body">
+                <img id="modalArtworkImage" src="" alt="Artwork">
+                <div class="modal-info">
+                    <h3>Inspired by these songs:</h3>
+                    <ul id="modalSongList"></ul>
+                    
+                    <div class="prompt-details">
+                        <h4>Artistic Elements Used:</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Color Palette:</span> 
+                            <span id="modalColorPalette"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Visual Elements:</span> 
+                            <span id="modalVisualElements"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mood:</span> 
+                            <span id="modalMood"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Themes:</span> 
+                            <span id="modalThemes"></span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Song Breakdown:</span> 
+                            <span id="modalSongBreakdown"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userArtworks = [];
+        let userStats = null;
+        let userProfile = null;
+
+        async function loadHistory() {
+            try {
+                const params = getHashParams();
+                if (!params.access_token) {
+                    throw new Error("No access token found. Please log in again.");
+                }
+
+                const response = await fetch(`/api/history?accessToken=${params.access_token}`);
+                if (!response.ok) {
+                    throw new Error("Failed to load history");
+                }
+
+                const data = await response.json();
+                userArtworks = data.artworks;
+                userStats = data.stats;
+                userProfile = data.user;
+
+                displayHistory();
+            } catch (error) {
+                console.error('Error loading history:', error);
+                showError(error.message);
+            }
+        }
+
+        function displayHistory() {
+            const loadingElement = document.getElementById('loading');
+            const contentElement = document.getElementById('content');
+            
+            loadingElement.style.display = 'none';
+            loadingElement.classList.add('hidden');
+            contentElement.style.display = 'block';
+
+            displayUserInfo();
+            displayStats();
+            displayArtworks();
+        }
+
+        function displayUserInfo() {
+            const userInfoEl = document.getElementById('userInfo');
+            
+            if (userProfile) {
+                userInfoEl.innerHTML = `
+                    ${userProfile.images && userProfile.images.length > 0 ? 
+                        `<img src="${userProfile.images[0].url}" alt="Profile" class="user-avatar">` : 
+                        `<div class="user-avatar" style="background: #1db954; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${userProfile.display_name ? userProfile.display_name[0] : 'U'}</div>`
+                    }
+                    <div class="user-details">
+                        <h2>${userProfile.display_name || 'Spotify User'}</h2>
+                        <p>${userArtworks.length} artwork${userArtworks.length !== 1 ? 's' : ''} generated</p>
+                    </div>
+                `;
+            } else {
+                userInfoEl.innerHTML = `
+                    <div class="user-avatar" style="background: #1db954; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">U</div>
+                    <div class="user-details">
+                        <h2>Anonymous User</h2>
+                        <p>${userArtworks.length} artwork${userArtworks.length !== 1 ? 's' : ''} generated</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayStats() {
+            const statsGridEl = document.getElementById('statsGrid');
+            
+            if (userStats && userArtworks.length > 0) {
+                statsGridEl.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${userStats.totalArtworks}</div>
+                        <div class="stat-label">Total Artworks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${userStats.uniqueSongs}</div>
+                        <div class="stat-label">Unique Songs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${userArtworks.length > 0 ? new Date(userStats.lastArtwork).toLocaleDateString() : 'N/A'}</div>
+                        <div class="stat-label">Last Created</div>
+                    </div>
+                `;
+            } else {
+                statsGridEl.innerHTML = '';
+            }
+        }
+
+        function displayArtworks() {
+            const artworksGridEl = document.getElementById('artworksGrid');
+            
+            if (userArtworks.length === 0) {
+                artworksGridEl.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Artworks Yet</h3>
+                        <p>Generate your first AI artwork to see it here!</p>
+                        <a href="/" class="btn-view btn-small">Generate Artwork</a>
+                    </div>
+                `;
+                return;
+            }
+
+            artworksGridEl.innerHTML = userArtworks.map(artwork => `
+                <div class="artwork-card">
+                    <img src="${artwork.imageUrl}" alt="Artwork" class="artwork-image" onclick="openArtworkModal('${artwork.id}')">
+                    <div class="artwork-info">
+                        <div class="artwork-date">${new Date(artwork.timestamp).toLocaleDateString()}</div>
+                        <div class="artwork-songs">
+                            <strong>Songs:</strong> ${artwork.songs.slice(0, 3).join(', ')}${artwork.songs.length > 3 ? '...' : ''}
+                        </div>
+                        <div class="artwork-actions">
+                            <button class="btn-small btn-view" onclick="openArtworkModal('${artwork.id}')">View Details</button>
+                            <button class="btn-small btn-delete" onclick="deleteArtwork('${artwork.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openArtworkModal(artworkId) {
+            const artwork = userArtworks.find(a => a.id === artworkId);
+            if (!artwork) return;
+
+            const modal = document.getElementById('artworkModal');
+            const modalImage = document.getElementById('modalArtworkImage');
+            const modalSongList = document.getElementById('modalSongList');
+            const modalColorPalette = document.getElementById('modalColorPalette');
+            const modalVisualElements = document.getElementById('modalVisualElements');
+            const modalMood = document.getElementById('modalMood');
+            const modalThemes = document.getElementById('modalThemes');
+            const modalSongBreakdown = document.getElementById('modalSongBreakdown');
+
+            modalImage.src = artwork.imageUrl;
+            
+            // Populate song list
+            modalSongList.innerHTML = '';
+            artwork.songs.forEach(song => {
+                const li = document.createElement('li');
+                li.textContent = song;
+                modalSongList.appendChild(li);
+            });
+
+            // Populate all the detailed information
+            modalColorPalette.textContent = artwork.details.colorPalette || 'Unknown';
+            modalVisualElements.textContent = artwork.details.visualElements || 'Unknown';
+            modalMood.textContent = artwork.details.mood || 'Unknown';
+            modalThemes.textContent = artwork.details.themes || 'Unknown';
+            
+            // Format song breakdown with proper line breaks
+            if (artwork.details.songBreakdown) {
+                modalSongBreakdown.innerHTML = artwork.details.songBreakdown.replace(/\n/g, '<br>');
+            } else {
+                modalSongBreakdown.textContent = 'Unknown';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeArtworkModal() {
+            document.getElementById('artworkModal').style.display = 'none';
+        }
+
+        async function deleteArtwork(artworkId) {
+            if (!confirm('Are you sure you want to delete this artwork?')) return;
+
+            try {
+                const params = getHashParams();
+                const response = await fetch(`/api/artwork/${artworkId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: params.access_token })
+                });
+
+                if (response.ok) {
+                    // Remove from local array and refresh display
+                    userArtworks = userArtworks.filter(a => a.id !== artworkId);
+                    userStats.totalArtworks = userArtworks.length;
+                    userStats.uniqueSongs = new Set(userArtworks.flatMap(artwork => artwork.songs)).size;
+                    
+                    displayStats();
+                    displayArtworks();
+                } else {
+                    alert('Failed to delete artwork');
+                }
+            } catch (error) {
+                console.error('Error deleting artwork:', error);
+                alert('Error deleting artwork');
+            }
+        }
+
+        function showError(message) {
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = 'none';
+            loadingElement.classList.add('hidden');
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = message;
+        }
+
+        function getHashParams() {
+            const hashParams = {};
+            let e, r = /([^&;=]+)=?([^&;]*)/g,
+                q = window.location.search.substring(1);
+            while (e = r.exec(q)) {
+                hashParams[e[1]] = decodeURIComponent(e[2]);
+            }
+            return hashParams;
+        }
+
+        function goBack() {
+            const params = getHashParams();
+            if (params.access_token) {
+                window.location.href = `/results?access_token=${params.access_token}`;
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('artworkModal');
+            if (event.target === modal) {
+                closeArtworkModal();
+            }
+        }
+
+        // Load history when page loads
+        loadHistory();
+    </script>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Made by <a href="https://connorpymm.com" target="_blank" rel="noopener noreferrer">Connor Pymm</a></p>
+    </footer>
+</body>
+</html>
