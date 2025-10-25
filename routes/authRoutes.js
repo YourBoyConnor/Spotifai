@@ -1007,8 +1007,12 @@ router.get('/history', async (req, res) => {
         const userProfile = await getSpotifyUserProfile(accessToken);
         const userId = userProfile ? userProfile.id : 'anonymous';
         
-        const artworks = getUserArtworks(userId);
-        const stats = getUserStats(userId);
+        const artworks = await getUserArtworks(userId);
+        const stats = await getUserStats(userId);
+        
+        console.log('History API - User ID:', userId);
+        console.log('History API - Artworks:', artworks);
+        console.log('History API - Stats:', stats);
         
         res.json({
             artworks: artworks,

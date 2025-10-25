@@ -68,6 +68,8 @@ if (!isVercel) {
 }
 
 export async function addArtwork(userId, artworkData) {
+    console.log('Adding artwork for user:', userId, 'isVercel:', isVercel, 'kv available:', !!kv);
+    
     const newArtwork = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
@@ -101,6 +103,8 @@ export async function addArtwork(userId, artworkData) {
 }
 
 export async function getUserArtworks(userId) {
+    console.log('Getting artworks for user:', userId, 'isVercel:', isVercel, 'kv available:', !!kv);
+    
     if (isVercel && kv) {
         // Use Vercel KV
         try {
