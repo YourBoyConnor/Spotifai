@@ -1,4 +1,4 @@
-// Hybrid Database - Works locally with files and on Vercel with KV
+// Hybrid Database - Works locally with files and on Vercel with Upstash Redis
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,19 +9,44 @@ const __dirname = path.dirname(__filename);
 // Check if we're running on Vercel
 const isVercel = process.env.VERCEL === '1';
 
-let kv = null;
+let redis = null;
 
-// Initialize Vercel KV if on Vercel
+// Initialize Upstash Redis if on Vercel
 if (isVercel) {
     try {
-        console.log('Initializing Vercel KV...');
-        const { kv: vercelKv } = await import('@vercel/kv');
-        kv = vercelKv;
-        console.log('Vercel KV initialized successfully');
+        console.log('Initializing Redis...');
+        
+        // Check for Upstash Redis credentials first
+        if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+            console.log('Using Upstash Redis REST API');
+            const { Redis } = await import('@upstash/redis');
+            redis = new Redis({
+                url: process.env.UPSTASH_REDIS_REST_URL,
+                token: process.env.UPSTASH_REDIS_REST_TOKEN,
+            });
+        } else if (process.env.REDIS_URL) {
+            console.log('Using Redis URL:', process.env.REDIS_URL);
+            // Use standard Redis client for Redis Cloud
+            const { createClient } = await import('redis');
+            redis = createClient({
+                url: process.env.REDIS_URL,
+            });
+            await redis.connect();
+            console.log('Connected to Redis Cloud');
+        } else {
+            console.log('No Redis credentials found, falling back to memory storage');
+            redis = null;
+        }
+        
+        if (redis) {
+            console.log('Redis initialized successfully');
+        } else {
+            console.log('Redis not available, using memory storage');
+        }
     } catch (error) {
-        console.error('Failed to import Vercel KV:', error);
-        console.log('Falling back to file-based storage');
-        kv = null;
+        console.error('Failed to import Redis:', error);
+        console.log('Falling back to memory storage');
+        redis = null;
     }
 } else {
     console.log('Running locally, using file-based storage');
@@ -74,7 +99,7 @@ if (!isVercel) {
 }
 
 export async function addArtwork(userId, artworkData) {
-    console.log('Adding artwork for user:', userId, 'isVercel:', isVercel, 'kv available:', !!kv);
+    console.log('Adding artwork for user:', userId, 'isVercel:', isVercel, 'redis available:', !!redis);
     
     const newArtwork = {
         id: Date.now().toString(),
@@ -82,17 +107,35 @@ export async function addArtwork(userId, artworkData) {
         ...artworkData
     };
 
-    if (isVercel && kv) {
-        // Use Vercel KV
+    if (isVercel && redis) {
+        // Use Redis (Upstash or standard)
         try {
+            // Check if Redis credentials are available
+            if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.REDIS_URL) {
+                console.log('Redis credentials missing, falling back to memory storage');
+                throw new Error('Redis credentials not configured');
+            }
+            
             const existingArtworks = await getUserArtworks(userId);
             const updatedArtworks = [newArtwork, ...existingArtworks];
             const limitedArtworks = updatedArtworks.slice(0, 50);
-            await kv.set(`artworks:${userId}`, limitedArtworks);
+            await redis.set(`artworks:${userId}`, JSON.stringify(limitedArtworks));
             return newArtwork;
         } catch (error) {
-            console.error('Error adding artwork to KV:', error);
-            throw error;
+            console.error('Error adding artwork to Redis:', error);
+            console.log('Falling back to memory storage for this session');
+            // Fall back to a simple in-memory storage for this session
+            if (!global.sessionArtworks) {
+                global.sessionArtworks = {};
+            }
+            if (!global.sessionArtworks[userId]) {
+                global.sessionArtworks[userId] = [];
+            }
+            global.sessionArtworks[userId].unshift(newArtwork);
+            if (global.sessionArtworks[userId].length > 50) {
+                global.sessionArtworks[userId] = global.sessionArtworks[userId].slice(0, 50);
+            }
+            return newArtwork;
         }
     } else {
         // Use file-based storage
@@ -109,26 +152,32 @@ export async function addArtwork(userId, artworkData) {
 }
 
 export async function getUserArtworks(userId) {
-    console.log('Getting artworks for user:', userId, 'isVercel:', isVercel, 'kv available:', !!kv);
+    console.log('Getting artworks for user:', userId, 'isVercel:', isVercel, 'redis available:', !!redis);
     
-    if (isVercel && kv) {
-        // Use Vercel KV
+    if (isVercel && redis) {
+        // Use Redis (Upstash or standard)
         try {
-            const artworks = await kv.get(`artworks:${userId}`);
-            console.log('KV artworks for user', userId, ':', artworks, 'type:', typeof artworks);
-            
-            // Ensure we always return an array
-            if (Array.isArray(artworks)) {
-                return artworks;
-            } else if (artworks && typeof artworks === 'object' && Object.keys(artworks).length > 0) {
-                // If it's a non-empty object, convert to array
-                return Object.values(artworks);
-            } else {
-                // Empty object, null, undefined, or other - return empty array
-                return [];
+            // Check if Redis credentials are available
+            if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.REDIS_URL) {
+                console.log('Redis credentials missing, falling back to memory storage');
+                throw new Error('Redis credentials not configured');
             }
+            
+            const artworksJson = await redis.get(`artworks:${userId}`);
+            console.log('Redis artworks for user', userId, ':', artworksJson, 'type:', typeof artworksJson);
+            
+            if (artworksJson) {
+                const artworks = JSON.parse(artworksJson);
+                return Array.isArray(artworks) ? artworks : [];
+            }
+            return [];
         } catch (error) {
-            console.error('Error getting artworks from KV:', error);
+            console.error('Error getting artworks from Redis:', error);
+            console.log('Falling back to memory storage for this session');
+            // Fall back to session memory storage
+            if (global.sessionArtworks && global.sessionArtworks[userId]) {
+                return global.sessionArtworks[userId];
+            }
             return [];
         }
     } else {

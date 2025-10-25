@@ -18,6 +18,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "redis": "^4.6.0",
+    "@upstash/redis": "^1.25.0",
     "@vercel/kv": "^1.0.0",
     "@wildcard-api/server": "^0.1.0",
     "assert": "^2.0.0",
