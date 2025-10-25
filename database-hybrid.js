@@ -14,11 +14,17 @@ let kv = null;
 // Initialize Vercel KV if on Vercel
 if (isVercel) {
     try {
+        console.log('Initializing Vercel KV...');
         const { kv: vercelKv } = await import('@vercel/kv');
         kv = vercelKv;
+        console.log('Vercel KV initialized successfully');
     } catch (error) {
         console.error('Failed to import Vercel KV:', error);
+        console.log('Falling back to file-based storage');
+        kv = null;
     }
+} else {
+    console.log('Running locally, using file-based storage');
 }
 
 // File-based storage for local development

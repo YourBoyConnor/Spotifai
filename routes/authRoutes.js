@@ -981,14 +981,23 @@ router.post('/generate-image', async (req, res) => {
             prompt: promptData.prompt
         };
         
-        const savedArtwork = await addArtwork(userId, artworkData);
+        console.log('Attempting to save artwork for user:', userId);
+        console.log('Artwork data:', artworkData);
         
-        console.log('Artwork saved successfully:', savedArtwork);
+        let savedArtwork = null;
+        try {
+            savedArtwork = await addArtwork(userId, artworkData);
+            console.log('Artwork saved successfully:', savedArtwork);
+        } catch (dbError) {
+            console.error('Database save error:', dbError);
+            // Continue with response even if database save fails
+            console.log('Continuing without database save due to error');
+        }
         
         res.json({ 
             url: response.data[0].url,
             details: promptData.details,
-            artworkId: savedArtwork.id,
+            artworkId: savedArtwork ? savedArtwork.id : null,
             userId: userId
         });
     } catch (error) {
