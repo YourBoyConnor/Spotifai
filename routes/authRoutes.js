@@ -998,9 +998,13 @@ router.post('/generate-image', async (req, res) => {
 // Get user's artwork history
 router.get('/history', async (req, res) => {
     try {
+        console.log('History API endpoint called');
+        console.log('Request query:', req.query);
+        
         const { accessToken } = req.query;
         
         if (!accessToken) {
+            console.log('No access token provided');
             return res.status(400).json({ error: 'Access token required' });
         }
         

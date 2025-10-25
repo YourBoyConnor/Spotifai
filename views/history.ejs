@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpotifAI - Your Artwork History</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+    <link rel="manifest" href="/img/site.webmanifest">
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .history-container {
@@ -469,17 +474,27 @@
 
         async function loadHistory() {
             try {
+                console.log('loadHistory() called');
                 const params = getHashParams();
+                console.log('URL params:', params);
+                console.log('Current URL:', window.location.href);
+                
                 if (!params.access_token) {
+                    console.error('No access token found in URL');
                     throw new Error("No access token found. Please log in again.");
                 }
 
+                console.log('Making API call to /api/history');
                 const response = await fetch(`/api/history?accessToken=${params.access_token}`);
+                console.log('API response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error("Failed to load history");
                 }
 
                 const data = await response.json();
+                console.log('API response data:', data);
+                
                 userArtworks = data.artworks;
                 userStats = data.stats;
                 userProfile = data.user;
@@ -674,9 +689,11 @@
             const hashParams = {};
             let e, r = /([^&;=]+)=?([^&;]*)/g,
                 q = window.location.search.substring(1);
+            console.log('URL search string:', q);
             while (e = r.exec(q)) {
                 hashParams[e[1]] = decodeURIComponent(e[2]);
             }
+            console.log('Parsed hash params:', hashParams);
             return hashParams;
         }
 
