@@ -981,7 +981,9 @@ router.post('/generate-image', async (req, res) => {
             prompt: promptData.prompt
         };
         
-        const savedArtwork = addArtwork(userId, artworkData);
+        const savedArtwork = await addArtwork(userId, artworkData);
+        
+        console.log('Artwork saved successfully:', savedArtwork);
         
         res.json({ 
             url: response.data[0].url,
