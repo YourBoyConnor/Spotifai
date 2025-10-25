@@ -567,12 +567,30 @@
                         <div class="stat-label">Unique Songs</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${userArtworks.length > 0 ? new Date(userStats.lastArtwork).toLocaleDateString() : 'N/A'}</div>
+                        <div class="stat-number">${userArtworks.length > 0 ? formatDate(userStats.lastCreated) : 'N/A'}</div>
                         <div class="stat-label">Last Created</div>
                     </div>
                 `;
             } else {
                 statsGridEl.innerHTML = '';
+            }
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown Date';
+            try {
+                const date = new Date(timestamp);
+                if (isNaN(date.getTime())) return 'Invalid Date';
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'Invalid Date';
             }
         }
 
@@ -608,9 +626,9 @@
             
             artworksGridEl.innerHTML = artworksArray.map(artwork => `
                 <div class="artwork-card">
-                    <img src="${artwork.imageUrl}" alt="Artwork" class="artwork-image" onclick="openArtworkModal('${artwork.id}')">
+                    <img src="${artwork.url}" alt="Artwork" class="artwork-image" onclick="openArtworkModal('${artwork.id}')">
                     <div class="artwork-info">
-                        <div class="artwork-date">${new Date(artwork.timestamp).toLocaleDateString()}</div>
+                        <div class="artwork-date">${formatDate(artwork.timestamp)}</div>
                         <div class="artwork-songs">
                             <strong>Songs:</strong> ${artwork.songs.slice(0, 3).join(', ')}${artwork.songs.length > 3 ? '...' : ''}
                         </div>
@@ -636,7 +654,7 @@
             const modalThemes = document.getElementById('modalThemes');
             const modalSongBreakdown = document.getElementById('modalSongBreakdown');
 
-            modalImage.src = artwork.imageUrl;
+            modalImage.src = artwork.url;
             
             // Populate song list
             modalSongList.innerHTML = '';
