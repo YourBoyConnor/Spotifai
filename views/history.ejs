@@ -480,6 +480,8 @@
                 }
 
                 const data = await response.json();
+                console.log('History data received:', data);
+                console.log('Artworks type:', typeof data.artworks, 'Is array:', Array.isArray(data.artworks));
                 userArtworks = data.artworks;
                 userStats = data.stats;
                 userProfile = data.user;
@@ -555,6 +557,12 @@
         function displayArtworks() {
             const artworksGridEl = document.getElementById('artworksGrid');
             
+            // Ensure userArtworks is an array
+            if (!Array.isArray(userArtworks)) {
+                console.error('userArtworks is not an array:', userArtworks);
+                userArtworks = [];
+            }
+            
             if (userArtworks.length === 0) {
                 artworksGridEl.innerHTML = `
                     <div class="empty-state">
@@ -566,7 +574,10 @@
                 return;
             }
 
-            artworksGridEl.innerHTML = userArtworks.map(artwork => `
+            // Ensure userArtworks is an array
+            const artworksArray = Array.isArray(userArtworks) ? userArtworks : [];
+            
+            artworksGridEl.innerHTML = artworksArray.map(artwork => `
                 <div class="artwork-card">
                     <img src="${artwork.imageUrl}" alt="Artwork" class="artwork-image" onclick="openArtworkModal('${artwork.id}')">
                     <div class="artwork-info">
